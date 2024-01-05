@@ -15,5 +15,5 @@ export class AppComponent {
   title = 'holo-merch-list';
 }
 
-//export const URL = "https://shop.geekjack.net/products/{{CHARACTER}}-{{NUMBER}}-{{CELEBRATIONTYPE}}-merch-complete-set";
+export const URL = "https://shop.geekjack.net/products/{{CHARACTER}}-{{NUMBER}}-{{CELEBRATIONTYPE}}-merch-complete-set";
 

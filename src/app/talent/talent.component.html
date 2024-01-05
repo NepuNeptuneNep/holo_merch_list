@@ -1,4 +1,7 @@
 <p>Showing merch for {{talent}}</p>
-<a target="_blank" href="{{url}}">
-    <img src="{{img_source}}">
-</a>
+
+<div *ngFor="let set of sets">
+    <a target="_blank" [href]="set.url">
+      <img [src]="set.img_url">
+    </a>
+  </div>
