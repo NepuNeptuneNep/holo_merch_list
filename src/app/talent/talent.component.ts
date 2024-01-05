@@ -1,28 +1,64 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { URL } from '../app.component';
-import { HttpClientModule} from '@angular/common/http';
-import { HttpClient} from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-
+import { Talent, talents} from "../talents";
 @Component({
   selector: "app-talent",
   standalone: true,
-  imports: [HttpClientModule, CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './talent.component.html',
   styleUrl: './talent.component.scss'
 })
 
 export class TalentComponent implements OnInit {
-  talent: string = this.route.snapshot.paramMap.get('talent') ?? "";
-
+  talent: Talent = talents?.find(i => i.website_string == this.route.snapshot.paramMap.get('talent')) ?? new Talent("Not found", []);
   sets: Set[] = [];
+  noMerchFound: boolean = false;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) {}
+  constructor(private route: ActivatedRoute) {}
   async ngOnInit() {
     await this.getAnniversaryCelebrations();
-
+    await this.getBirthdayCelebrations();
+    await this.getSpecialSets();
     console.log(this.sets);
+
+    if(this.sets.length == 0)
+    {
+      this.noMerchFound = true;
+    }
+  }
+
+  async getSpecialSets(): Promise<void> 
+  {
+  
+    for (const setUrl in this.talent.special_sets)
+    {
+      const preview_img = await this.getPreviewImage(this.talent.special_sets[parseInt(setUrl)]);
+      this.sets.push({url: this.talent.special_sets[parseInt(setUrl)], img_url: preview_img});
+    }
+  }
+
+  async getBirthdayCelebrations(): Promise<void> {
+    const celebrationType = 'birthday-celebration';
+
+
+    for (let i = 2018; i <= 2024; i++)
+    {
+      const url = URL
+      .replace('{{CHARACTER}}', this.talent.website_string)
+      .replace('{{VAR1}}', celebrationType)
+      .replace('{{VAR2}}', `${i}`);
+    console.log(url);
+
+    const img_url = await this.getPreviewImage(url);
+
+    if(await this.checkUrl(url))
+    {
+      this.sets.push({url, img_url});
+      console.log(url + " " + img_url);
+    }
+    }
   }
 
   async getAnniversaryCelebrations(): Promise<void> {
@@ -46,9 +82,9 @@ export class TalentComponent implements OnInit {
       }
   
       const url = URL
-        .replace('{{CHARACTER}}', this.talent)
-        .replace('{{NUMBER}}', number)
-        .replace('{{CELEBRATIONTYPE}}', celebrationType);
+        .replace('{{CHARACTER}}', this.talent.website_string)
+        .replace('{{VAR1}}', number)
+        .replace('{{VAR2}}', celebrationType);
       console.log(url);
 
       const img_url = await this.getPreviewImage(url);
@@ -67,12 +103,11 @@ export class TalentComponent implements OnInit {
     const html = await response.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    const img = doc.querySelector('img[alt*="Merch Complete Set"]');
+    const img = doc.querySelector('img[alt*="set" i]');
     const src = img?.getAttribute("data-original-src");
     console.log(src);
     return "https:" + src; 
   }
-
 
   async checkUrl(url: string): Promise<boolean> {
     try {
