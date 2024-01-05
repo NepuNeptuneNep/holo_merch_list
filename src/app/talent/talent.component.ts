@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+//import { URL } from '../app.component';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-character',
@@ -12,11 +15,48 @@ import { ActivatedRoute } from '@angular/router';
 export class TalentComponent implements OnInit {
   talent: string = this.route.snapshot.paramMap.get('talent') ?? "";
   img_source: string = "";
-  url: string = "https://shop.geekjack.net/products/tokoyami-towa-2nd-anniversary-celebration-merch-complete-set";
-  constructor(private route: ActivatedRoute) {}
+  url: string = "URL";
+
+  constructor(private route: ActivatedRoute, private http: HttpClient) {}
 
   async ngOnInit() {
-    this.getPreviewImage(this.url);
+    await this.getAnniversaryCelebrations();
+    await this.getPreviewImage(this.url);
+  }
+
+
+
+  async getAnniversaryCelebrations(): Promise<void> {
+    const celebrationType = 'anniversary-celebration';
+  
+    for (let i = 1; i <= 9; i++) {
+      let number: string;
+      switch (i) {
+        case 1:
+          number = '1st';
+          break;
+        case 2:
+          number = '2nd';
+          break;
+        case 3:
+          number = '3rd';
+          break;
+        default:
+          number = `${i}th`;
+          break;
+      }
+  
+      const url = "URL"
+        .replace('{{CHARACTER}}', this.talent)
+        .replace('{{NUMBER}}', number)
+        .replace('{{CELEBRATIONTYPE}}', celebrationType);
+      console.log(url);
+  
+      if(await this.checkUrl(url))
+      {
+        this.url = url;
+      }
+    }
   }
 
   async getPreviewImage(url:string)
@@ -30,4 +70,24 @@ export class TalentComponent implements OnInit {
     console.log(src);
     this.img_source = "https:" + src; 
   }
+
+
+  async checkUrl(url: string): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(this.http.head(url));
+      if (response instanceof HttpResponse)
+      {      
+        return response.ok;
+      }
+      return false;
+    } 
+    catch (error) {
+      return false;
+    }
+  }
+}
+
+class Set {
+  url: string = "";
+  img_url: string = "";
 }
