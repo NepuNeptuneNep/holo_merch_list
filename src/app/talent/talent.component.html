@@ -1,14 +1,40 @@
 <button routerLink="/list">Talent List</button>
-
-<p>Showing merch for {{talent.name}}</p>
+<button (click)="searchBuyeeForTalent(talent)">
+  Search for {{ talent.name }} on Mercari
+</button>
+<button (click)="sortSets()">Sort sets</button>
 <div class="container">
-    <div class="row">
-      <div class="col" *ngFor="let set of sets">
-        <a target="_blank" [href]="set.url">
-          <img [src]="set.img_url">
-        </a>
+  <div class="row">
+    <div class="col" *ngFor="let birthdaySet of birthdaySets">
+      <a target="_blank" [href]="birthdaySet.url">
+        <img [src]="birthdaySet.img_url" />
+      </a>
+      <div class="buttonContainer">
+        <button (click)="searchBuyeeForSet(talent, birthdaySet.setKeyword)">
+          Search for this set on Mercari
+        </button>
+      </div>
+    </div>
+    <div class="col" *ngFor="let anniversarySet of anniversarySets">
+      <a target="_blank" [href]="anniversarySet.url">
+        <img [src]="anniversarySet.img_url" />
+      </a>
+      <div class="buttonContainer">
+        <button (click)="searchBuyeeForSet(talent, anniversarySet.setKeyword)">
+          Search for this set on Mercari
+        </button>
+      </div>
+    </div>
+    <div class="col" *ngFor="let otherSet of otherSets">
+      <a target="_blank" [href]="otherSet.url">
+        <img [src]="otherSet.img_url" />
+      </a>
+      <div class="buttonContainer">
+        <button (click)="searchBuyeeForSet(talent, otherSet.setKeyword)">
+          Search for this set on Mercari
+        </button>
       </div>
     </div>
   </div>
-
-  <p *ngIf="noMerchFound">No merch could be found for this character.</p>
+</div>
+<p *ngIf="noMerchFound">No merch could be found for this character.</p>
