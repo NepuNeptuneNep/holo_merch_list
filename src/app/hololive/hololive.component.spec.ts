@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TalentComponent } from './talent.component';
+import { HololiveComponent } from './hololive.component';
 
-describe('ListingComponent', () => {
-  let component: TalentComponent;
-  let fixture: ComponentFixture<TalentComponent>;
+describe('HololiveComponent', () => {
+  let component: HololiveComponent;
+  let fixture: ComponentFixture<HololiveComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TalentComponent],
+      imports: [HololiveComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TalentComponent);
+    fixture = TestBed.createComponent(HololiveComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

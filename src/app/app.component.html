@@ -1,1 +1,14 @@
-<router-outlet></router-outlet>
+<main>
+  <header>
+    <img
+      class="mogus"
+      src="{{ currentImage }}"
+      alt="logo"
+      aria-hidden="true"
+      (click)="mogusLive()"
+    />
+  </header>
+  <section>
+    <router-outlet></router-outlet>
+  </section>
+</main>
