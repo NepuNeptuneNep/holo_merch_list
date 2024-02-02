@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { URL } from '../app.component';
+import { Observable, combineLatest, BehaviorSubject, map } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Talent, talents } from '../talents.service';
 
@@ -18,10 +19,27 @@ export class TalentComponent implements OnInit {
         i.website_string == this.route.snapshot.paramMap.get('talent') ||
         i.website_string_alt == this.route.snapshot.paramMap.get('talent')
     ) ?? new Talent('Not found', '', [], [], [], '', '');
-  birthdaySets: Set[] = [];
-  anniversarySets: Set[] = [];
-  otherSets: Set[] = [];
-  noMerchFound: boolean = false;
+  birthdaySets = new BehaviorSubject<Set[]>([]);
+  anniversarySets = new BehaviorSubject<Set[]>([]);
+  otherSets = new BehaviorSubject<Set[]>([]);
+
+  combinedObservables = combineLatest([
+    this.birthdaySets.asObservable(),
+    this.anniversarySets.asObservable(),
+    this.otherSets.asObservable(),
+  ]).subscribe(() => {
+    this.sortSets();
+  });
+
+  noMerchFound: Observable<boolean> = combineLatest([
+    this.birthdaySets.asObservable(),
+    this.anniversarySets.asObservable(),
+    this.otherSets.asObservable(),
+  ]).pipe(
+    map(([birthdays, anniversaries, others]) => {
+      return birthdays.length === 0 && anniversaries.length === 0 && others.length === 0;
+    })
+  );
 
   getAltTalentName(talent: Talent) {
     if (talent.japName != '') {
@@ -52,39 +70,35 @@ export class TalentComponent implements OnInit {
   }
 
   sortSets() {
-    const sortedBirthdaySets = [...this.birthdaySets].sort((a, b) =>
+    const sortedBirthdaySets = [...this.birthdaySets.getValue()].sort((a, b) =>
       a.setKeyword.localeCompare(b.setKeyword)
     );
-    this.birthdaySets = sortedBirthdaySets;
+    this.birthdaySets.next(sortedBirthdaySets);
 
-    const sortedAnniversarySets = [...this.anniversarySets].sort((a, b) =>
+    const sortedAnniversarySets = [...this.anniversarySets.getValue()].sort((a, b) =>
       a.setKeyword.localeCompare(b.setKeyword)
     );
-    this.anniversarySets = sortedAnniversarySets;
+    this.anniversarySets.next(sortedAnniversarySets);
 
-    const sortedOtherSets = [...this.otherSets].sort((a, b) =>
+    const sortedOtherSets = [...this.otherSets.getValue()].sort((a, b) =>
       a.setKeyword.localeCompare(b.setKeyword)
     );
-    this.otherSets = sortedOtherSets;
+    this.otherSets.next(sortedOtherSets);
   }
 
   constructor(private route: ActivatedRoute) {}
 
   async ngOnInit() {
-    await this.getBirthdayCelebrations();
-    await this.getAnniversaryCelebrations();
-    await this.getSpecialSets();
+    this.birthdaySets.subscribe();
+    this.anniversarySets.subscribe();
+    this.otherSets.subscribe();
+    
+    this.getBirthdayCelebrations();
+    this.getAnniversaryCelebrations();
+    this.getSpecialSets();
     console.log(this.birthdaySets);
     console.log(this.anniversarySets);
     console.log(this.otherSets);
-
-    if (
-      this.birthdaySets.length == 0 &&
-      this.anniversarySets.length == 0 &&
-      this.otherSets.length == 0
-    ) {
-      this.noMerchFound = true;
-    }
   }
 
   async getSpecialSets(): Promise<void> {
@@ -93,26 +107,24 @@ export class TalentComponent implements OnInit {
         this.talent.special_sets[parseInt(setUrl)],
         this.talent.special_keyword[parseInt(setUrl)]
       );
+
+      const set =  {
+        url: this.talent.special_sets[parseInt(setUrl)],
+        img_url: preview_img,
+        setKeyword: this.talent.special_keyword[parseInt(setUrl)],
+      }
+
       if (this.talent.special_indicator[parseInt(setUrl)] == 'other') {
-        this.otherSets.push({
-          url: this.talent.special_sets[parseInt(setUrl)],
-          img_url: preview_img,
-          setKeyword: this.talent.special_keyword[parseInt(setUrl)],
-        });
+        const currentArray = [...this.otherSets.getValue(), set];
+        this.otherSets.next(currentArray);
       } else if (
         this.talent.special_indicator[parseInt(setUrl)] == 'birthday'
       ) {
-        this.birthdaySets.push({
-          url: this.talent.special_sets[parseInt(setUrl)],
-          img_url: preview_img,
-          setKeyword: this.talent.special_keyword[parseInt(setUrl)],
-        });
+        const currentArray = [...this.birthdaySets.getValue(), set];
+        this.birthdaySets.next(currentArray);
       } else {
-        this.anniversarySets.push({
-          url: this.talent.special_sets[parseInt(setUrl)],
-          img_url: preview_img,
-          setKeyword: this.talent.special_keyword[parseInt(setUrl)],
-        });
+        const currentArray = [...this.anniversarySets.getValue(), set];
+        this.anniversarySets.next(currentArray);
       }
     }
   }
@@ -144,14 +156,14 @@ export class TalentComponent implements OnInit {
       const img_url_alt = await this.getPreviewImage(url_alt, setKeyword);
 
       if (await this.checkUrl(url)) {
-        this.birthdaySets.push({ url, img_url, setKeyword });
+        const set = { url, img_url, setKeyword };
+        const currentArray = [...this.birthdaySets.getValue(), set];
+        this.birthdaySets.next(currentArray);
         console.log(url + ' ' + img_url);
       } else if (await this.checkUrl(url_alt)) {
-        this.birthdaySets.push({
-          url: url_alt,
-          img_url: img_url_alt,
-          setKeyword,
-        });
+        const set = { url: url_alt, img_url: img_url_alt, setKeyword };
+        const currentArray = [...this.birthdaySets.getValue(), set];
+        this.birthdaySets.next(currentArray);
         console.log(url_alt + ' ' + img_url_alt);
       }
     }
@@ -200,15 +212,19 @@ export class TalentComponent implements OnInit {
       const img_url_alt = await this.getPreviewImage(url_alt, setKeyword);
 
       if (await this.checkUrl(url)) {
-        this.anniversarySets.push({ url, img_url, setKeyword });
+        const set = { url, img_url, setKeyword };
+        const currentArray = [...this.anniversarySets.getValue(), set];
         console.log(url + ' ' + img_url);
+        this.anniversarySets.next(currentArray);
       } else if (await this.checkUrl(url_alt)) {
-        this.anniversarySets.push({
+        const set = {
           url: url_alt,
           img_url: img_url_alt,
           setKeyword,
-        });
+        };
+        const currentArray = [...this.anniversarySets.getValue(), set];
         console.log(url_alt + ' ' + img_url_alt);
+        this.anniversarySets.next(currentArray);
       }
     }
   }
