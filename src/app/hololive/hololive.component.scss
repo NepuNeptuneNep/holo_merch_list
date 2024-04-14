@@ -1,11 +1,13 @@
 .gallery {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start; 
+  justify-content: flex-start;
   gap: 10px; 
 }
 
 .gallery img {
-  width: calc(25% - 10px); 
+  width: 15%;
   margin-bottom: 10px;
+  flex-grow: 1; 
+  box-sizing: border-box; 
 }
