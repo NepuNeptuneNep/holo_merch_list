@@ -2,17 +2,28 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { talents } from '../talents.service';
+import { FormsModule } from '@angular/forms';
+import { BehaviorSubject, combineLatest, Observable, map } from 'rxjs';
 
 @Component({
   selector: 'app-hololive',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './hololive.component.html',
   styleUrl: './hololive.component.scss',
 })
 export class HololiveComponent {
-  talent_list: TalentsWithPreviews[] = [];
+  talent_list: BehaviorSubject<TalentsWithPreviews[]> = new BehaviorSubject<TalentsWithPreviews[]>([]);
   char_image_url = '';
+  filter: BehaviorSubject<string> = new BehaviorSubject('');
+
+  filtered_talent_list: Observable<TalentsWithPreviews[]> = 
+  combineLatest([this.talent_list.asObservable(), this.filter.asObservable()])
+  .pipe(
+    map((
+      [talents, filterString]) =>
+     talents.filter(t => t.talent_string.toLowerCase().trim().includes(filterString.toLowerCase().trim()))
+  ));
 
   async ngOnInit(): Promise<void> {
     for (const talent in talents) {
@@ -24,8 +35,14 @@ export class HololiveComponent {
         talent_series,
         talent_name
       );
-      this.talent_list.push({ talent_string, preview_img });
+      const temp_list = this.talent_list.getValue();
+      temp_list.push({ talent_string, preview_img });
+      this.talent_list.next(temp_list);   
     }
+  }
+
+  getValue(event: Event): string {
+    return (event.target as HTMLInputElement).value;
   }
 
   async getCharacterImage(
