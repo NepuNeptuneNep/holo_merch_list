@@ -686,8 +686,8 @@ export const talents: Talent[] = [
   new Talent('Tsukumo Sana', '九十九 佐命', [], [], [], 'hololive'),
 
   //HOLOLIVE ENGLISH -ADVENT-
-  //  new Talent('Shiori Novella', 'シオリ・ノヴェラ', [], [], 'hololive'),
-  //  new Talent('Koseki Bijou', '古石ビジュ―', [], [], 'hololive'),
+  // new Talent('Shiori Novella', 'シオリ・ノヴェラ', [], [], [], 'hololive'),
+  //  new Talent('Koseki Bijou', '古石ビジュ―', [], [], [], 'hololive'),
   new Talent(
     'Nerissa Ravencroft',
     'ネリッサ・レイヴンクロフト',
@@ -696,8 +696,8 @@ export const talents: Talent[] = [
     [],
     'hololive'
   ),
-  //  new Talent('Fuwawa Abyssgard', 'フワワ・アビスガード', [], [], 'hololive'),
-  //  new Talent('Mococo Abyssgard', 'モココ・アビスガード', [], [], 'hololive'),
+    new Talent('Fuwawa Abyssgard', 'フワワ・アビスガード', [], [], [], 'hololive'),
+    new Talent('Mococo Abyssgard', 'モココ・アビスガード', [], [], [],'hololive'),
 
   //HOLOLIVE ReGLOSS
   //  new Talent('Hiodoshi Ao', '火威青', [], [], 'hololive'),
