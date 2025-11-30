@@ -70,10 +70,14 @@
             "buildTarget": "holo-merch-list:build"
           },
           "configurations": {
+            "development": {
+              "buildTarget": "holo-merch-list:build:development"
+            },
             "production": {
               "buildTarget": "holo-merch-list:build:production"
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",

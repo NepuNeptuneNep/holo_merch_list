@@ -22,6 +22,7 @@ export class TalentComponent implements OnInit {
     special_sets: [],
     special_keyword: [],
     special_indicator: [],
+    character_image_url: "",
   };
 
   birthdaySets = new BehaviorSubject<Set[]>([]);

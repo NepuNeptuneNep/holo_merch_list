@@ -12,6 +12,7 @@ export interface Talent {
   special_sets: string[];
   special_keyword: string[];
   special_indicator: string[];
+  character_image_url: string;
 }
 
 @Injectable({

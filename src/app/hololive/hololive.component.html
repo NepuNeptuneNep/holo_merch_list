@@ -1,8 +1,8 @@
 <input type="text" [value]="filter | async" (input)="filter.next(getValue($event))" placeholder="Search for talent">
 <div class="gallery">
   <div *ngFor="let talent of filtered_talent_list | async">
-    <a routerLink="/{{ talent.talent_string }}">
-      <img [src]="talent.preview_img" style="height: 200px; width: 200px" />
+    <a routerLink="/{{ talent.website_string }}">
+      <img [src]="talent.character_image_url" style="height: 200px; width: 200px" />
     </a>
   </div>
 </div>
