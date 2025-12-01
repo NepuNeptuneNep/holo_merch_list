@@ -3,16 +3,21 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
-export interface Talent {
+export interface TalentPreview {
   name: string;
-  japName: string;
-  website_string: string;
-  website_string_alt: string;
-  series: string;
-  special_sets: string[];
-  special_keyword: string[];
-  special_indicator: string[];
   character_image_url: string;
+}
+
+export interface TalentDetail {
+  name: string;
+  japanese_name: string;
+  sets: Set[];
+}
+
+export interface Set{
+  image_url: string,
+  href: string,
+  name: string
 }
 
 @Injectable({
@@ -23,12 +28,12 @@ export class TalentService {
 
   constructor(private http: HttpClient) { }
 
-  getTalents(): Observable<Talent[]> {
-    return this.http.get<Talent[]>(this.apiUrl);
+  getTalents(): Observable<TalentPreview[]> {
+    return this.http.get<TalentPreview[]>(this.apiUrl);
   }
 
-  getTalent(slug: string): Observable<Talent> {
-    return this.http.get<Talent>(`${this.apiUrl}/${encodeURIComponent(slug)}`);
+  getTalent(slug: string): Observable<TalentDetail> {
+    return this.http.get<TalentDetail>(`${this.apiUrl}/${encodeURIComponent(slug)}`);
   }
 }
 
