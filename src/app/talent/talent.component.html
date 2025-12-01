@@ -31,7 +31,7 @@
           <div class="bubble">
             <img [src]="set.image_url" alt="{{talent.name }}" />
             <button class="set-btn" type="button" (click)="searchBuyeeForSet(set.name)">
-              Search this set on Mercari
+              Search Mercari
             </button>
           </div>
         </a>
@@ -42,4 +42,4 @@
   </main>
 </div>
 
-<p *ngIf="talent.sets.length === 0 && talent.name !== ''">No merch could be found for this character.</p>
+<p *ngIf="talent.sets.length === 0 && talent.name !== ''">No merch could be found for this talent.</p>

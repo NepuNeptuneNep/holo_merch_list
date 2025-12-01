@@ -42,22 +42,10 @@ export class TalentComponent implements OnInit {
   }
 
   searchBuyeeForTalent() {
-    let searchUrl = 'https://buyee.jp/mercari/search?keyword=';
-
-    searchUrl = searchUrl + this.talent.japanese_name;
-
-    searchUrl = searchUrl + '&status=on_sale&items=40&lang=en';
-
-    window.open(searchUrl, '_blank');
+    window.open('https://buyee.jp/mercari/search?keyword=' + this.talent.japanese_name + '&status=on_sale&items=40&lang=en', '_blank');
   }
 
   searchBuyeeForSet(keyword: string) {
-    let searchUrl = 'https://buyee.jp/mercari/search?keyword=';
-
-    searchUrl = searchUrl + keyword;
-
-    searchUrl = searchUrl + '&status=on_sale&items=40&lang=en';
-
-    window.open(searchUrl, '_blank');
+    window.open('https://buyee.jp/mercari/search?keyword=' + keyword + '&status=on_sale&items=40&lang=en', '_blank');
   }
 }

@@ -1,8 +1,38 @@
-<input type="text" [value]="filter | async" (input)="filter.next(getValue($event))" placeholder="Search for talent">
-<div class="gallery">
-  <div *ngFor="let talent of filtered_talent_list | async">
-    <a routerLink="/{{ talent.name | kebabcase }}">
-      <img [src]="talent.character_image_url" style="height: 200px; width: 200px" />
-    </a>
-  </div>
+<div class="page-layout">
+  <aside class="side-actions">
+    <div class="toolbar-card vertical">
+      <div class="talent-badge">
+        <div class="badge-name">Talent list</div>
+        <div class="badge-sub">Browse all members merch</div>
+      </div>
+
+      <div class="glass-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="glass-input"
+          [value]="filter | async"
+          (input)="filter.next(getValue($event))"
+          placeholder="Search for talent"
+        />
+      </div>
+    </div>
+  </aside>
+
+  <section class="gallery">
+    <div class="row">
+      <div class="col" *ngFor="let talent of filtered_talent_list | async">
+        <div class="image-card">
+          <div class="bubble">
+            <a [routerLink]="['/', (talent.name | kebabcase)]">
+              <img
+                [src]="talent.character_image_url"
+                [alt]="talent.name"
+              />
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
