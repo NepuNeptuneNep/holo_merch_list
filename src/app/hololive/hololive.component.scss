@@ -1,0 +1,120 @@
+.auth-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.google-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 12px;
+    background: #fff;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    box-shadow: none;
+    border-radius: 12px;
+    font-weight: 600;
+    gap: 10px;
+}
+
+.google-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+}
+
+.google-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.auth-status {
+    font-size: 0.85rem;
+    color: rgba(241, 245, 249, 0.85);
+}
+
+.auth-status.success {
+    color: #34d399;
+}
+
+.signed-in-btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(15, 23, 42, 0.8));
+    box-shadow: 0 10px 26px rgba(2, 6, 23, 0.24);
+    cursor: default;
+    pointer-events: none; // prevent click animation/interaction once signed in
+}
+
+.logout-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.85), rgba(239, 68, 68, 0.9));
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    box-shadow:
+        0 10px 26px rgba(248, 113, 113, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px) saturate(125%);
+    transition: transform 120ms ease, box-shadow 150ms ease, opacity 120ms ease;
+}
+
+.logout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 16px 32px rgba(248, 113, 113, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.logout-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 8px 18px rgba(239, 68, 68, 0.22);
+}
+
+.avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+}
+
+.avatar-fallback {
+    font-weight: 700;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+}
+
+.signed-in-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.signed-in-name {
+    font-weight: 700;
+    color: #fff;
+}
+
+.signed-in-email {
+    font-size: 0.85rem;
+    color: rgba(226, 232, 240, 0.8);
+}

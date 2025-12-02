@@ -16,6 +16,43 @@
           placeholder="Search for talent"
         />
       </div>
+
+      <div class="auth-block">
+        <ng-container *ngIf="profile$ | async as profile; else signInButton">
+          <button class="btn signed-in-btn" type="button" disabled>
+            <span class="avatar" [ngStyle]="{ 'background-image': profile.pictureUrl ? 'url(' + profile.pictureUrl + ')' : '' }">
+              <span *ngIf="!profile.pictureUrl" class="avatar-fallback">
+                {{ (profile.name || profile.email || 'U') | slice:0:1 | uppercase }}
+              </span>
+            </span>
+            <span class="signed-in-text">
+              <span class="signed-in-name">{{ profile.name || 'Signed in' }}</span>
+              <span class="signed-in-email" *ngIf="profile.email">{{ profile.email }}</span>
+            </span>
+          </button>
+          <button class="btn logout-btn" type="button" (click)="signOut()">Log out</button>
+          <div class="auth-status success" *ngIf="authMessage">{{ authMessage }}</div>
+        </ng-container>
+        <ng-template #signInButton>
+          <button
+            class="btn google-btn"
+            type="button"
+            (click)="signInWithGoogle()"
+            [disabled]="isAuthenticating"
+          >
+            <span class="google-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 533.5 544.3">
+                <path fill="#4285f4" d="M533.5 278.4c0-18.5-1.5-37-4.7-54.9H272v103.9h147c-6.3 34.2-25.1 63.2-53.5 82.5v68h86.4c50.6-46.6 81.6-115.3 81.6-199.5z"/>
+                <path fill="#34a853" d="M272 544.3c72.7 0 133.7-24.1 178.3-65.4l-86.4-68c-24 16.1-55 25.4-91.9 25.4-70.7 0-130.6-47.6-152-111.5h-89.9v69.9c44.8 88.4 137.2 149.6 241.9 149.6z"/>
+                <path fill="#fbbc04" d="M120 324.8c-10.9-32.2-10.9-66.9 0-99.1v-70h-89.9c-37.7 74.5-37.7 164.6 0 239.1z"/>
+                <path fill="#ea4335" d="M272 107.7c38.6-.6 75.6 13.6 103.9 39.7l78-78C404.4 24 342.9-.7 272 0 167.3 0 74.9 61.2 30.1 149.6l89.9 69.9C141.4 155.3 201.3 107.7 272 107.7z"/>
+              </svg>
+            </span>
+            <span>Sign in with Google</span>
+          </button>
+          <div class="auth-status" *ngIf="authMessage">{{ authMessage }}</div>
+        </ng-template>
+      </div>
     </div>
   </aside>
 
