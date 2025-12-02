@@ -242,7 +242,7 @@ app-root {
 
 .row {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
     gap: 12px;
     align-items: start;
     margin: 10px 0;
