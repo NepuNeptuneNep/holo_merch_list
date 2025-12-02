@@ -58,7 +58,6 @@ export class AuthService {
 
       const cleanup = () => {
         window.removeEventListener('message', onMessage);
-        clearInterval(pollTimer);
       };
 
       const onMessage = (event: MessageEvent) => {
@@ -73,33 +72,16 @@ export class AuthService {
           cleanup();
           observer.next();
           observer.complete();
-          if (!popup.closed) {
-            popup.close();
-          }
         } else if (data.error === 'forbidden') {
           cleanup();
           observer.error({ status: 403, message: 'Forbidden Google account' });
-          if (!popup.closed) {
-            popup.close();
-          }
         } else if (data.error) {
           cleanup();
           observer.error(new Error(data.error));
-          if (!popup.closed) {
-            popup.close();
-          }
         }
       };
 
       window.addEventListener('message', onMessage);
-
-      const pollTimer = window.setInterval(() => {
-        if (popup.closed) {
-          cleanup();
-          observer.error(new Error('Popup closed before completing sign-in.'));
-        }
-      }, 600);
-
       return () => cleanup();
     });
   }
