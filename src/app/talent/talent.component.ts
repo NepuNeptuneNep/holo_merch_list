@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TalentDetail, TalentService } from '../talents.service';
+import { AuthService } from '../auth.service';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-talent',
@@ -16,10 +18,12 @@ export class TalentComponent implements OnInit {
     japanese_name: '',
     sets: [],
   };
+  isSignedIn$ = this.authService.sessionToken$.pipe(map(token => !!token));
 
   constructor(
     private route: ActivatedRoute,
-    private talentService: TalentService
+    private talentService: TalentService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {

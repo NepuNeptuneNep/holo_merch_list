@@ -56,7 +56,7 @@
     </div>
   </aside>
 
-  <section class="gallery">
+  <section class="gallery" *ngIf="isSignedIn$ | async; else textTalentList">
     <div class="row">
       <div class="col" *ngFor="let talent of filtered_talent_list | async">
         <div class="image-card">
@@ -72,4 +72,17 @@
       </div>
     </div>
   </section>
+
+  <ng-template #textTalentList>
+    <section class="talent-text-list">
+      <button
+        class="talent-text-btn"
+        type="button"
+        *ngFor="let talent of filtered_talent_list | async"
+        [routerLink]="['/', (talent.name | kebabcase)]"
+      >
+        {{ talent.name }}
+      </button>
+    </section>
+  </ng-template>
 </div>

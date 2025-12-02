@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HololiveComponent } from './hololive.component';
+import { VtuberComponent } from './vtuber.component';
 
-describe('HololiveComponent', () => {
-  let component: HololiveComponent;
-  let fixture: ComponentFixture<HololiveComponent>;
+describe('VtuberComponent', () => {
+  let component: VtuberComponent;
+  let fixture: ComponentFixture<VtuberComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HololiveComponent],
+      imports: [VtuberComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(HololiveComponent);
+    fixture = TestBed.createComponent(VtuberComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

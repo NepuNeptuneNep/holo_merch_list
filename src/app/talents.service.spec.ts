@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { Talent } from './talents.service';
 
-describe('HololiveListingService', () => {
+describe('TalentService', () => {
   let service: Talent;
 
   beforeEach(() => {

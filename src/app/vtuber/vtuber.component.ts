@@ -8,19 +8,20 @@ import { KebabPipe } from '../kebabcase.pipe';
 import { AuthService, UserProfile } from '../auth.service';
 
 @Component({
-  selector: 'app-hololive',
+  selector: 'app-vtuber',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, KebabPipe],
-  templateUrl: './hololive.component.html',
-  styleUrl: './hololive.component.scss',
+  templateUrl: './vtuber.component.html',
+  styleUrl: './vtuber.component.scss',
 })
 
-export class HololiveComponent {
+export class VtuberComponent {
   talents = new BehaviorSubject<TalentPreview[]>([]);
   filter = new BehaviorSubject<string>('');
   isAuthenticating = false;
   authMessage = '';
   profile$ = this.authService.profile$;
+  isSignedIn$ = this.authService.sessionToken$.pipe(map(token => !!token));
 
   filtered_talent_list: Observable<TalentPreview[]> =
     combineLatest([this.talents.asObservable(), this.filter.asObservable()]).pipe(

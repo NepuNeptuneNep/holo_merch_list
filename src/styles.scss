@@ -280,7 +280,7 @@ app-root {
     aspect-ratio: auto;
 }
 
-/* Variant: square avatar cards (Hololive etc.) – optional */
+/* Variant: square avatar cards (VTuber etc.)  Eoptional */
 .image-card--avatar {
     aspect-ratio: 1 / 1;
     width: 100%;
@@ -332,7 +332,7 @@ app-root {
     mix-blend-mode: screen;
 }
 
-/* Images – this is the important part */
+/* Images  Ethis is the important part */
 .image-card .bubble img {
     display: block;
     width: 100%;            /* image fills bubble width  */
