@@ -1,5 +1,5 @@
 # holo_merch_list
-Dynamically generates links to the hololive merchandise bundles in a list so it's easy to see all past merchandise without searching.
+Dynamically generates a list of links to Hololive merchandise bundles, making it easy to view all past merchandise without searching.
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.0.9.
 
