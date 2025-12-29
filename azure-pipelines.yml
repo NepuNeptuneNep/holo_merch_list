@@ -30,7 +30,7 @@ steps:
 
       npx angular-cli-ghpages \
         --dir=dist \
-        --branch=$GH_PAGES_BRANCH \
+        --branch=gh-pages \
         --no-silent \
         --cname=tsunomaki.wata.me
     displayName: 'Deploy to GitHub Pages (gh-pages branch)'
