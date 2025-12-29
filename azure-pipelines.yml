@@ -30,40 +30,12 @@ steps:
       git config user.name "Azure Pipelines"
       git config user.email "builds@azure-pipelines.local"
 
-      # Change to this if it is ever planned to make deployment simpler, but it needs a PAT in the pipeline:
-      # REPO_URL="https://$(GITHUB_TOKEN)@github.com/NepuNeptuneNep/holo_merch_list.git"
+      REPO_URL="$(git config --get remote.origin.url)"
 
-      # npx angular-cli-ghpages \
-      #   --dir=dist \
-      #   --branch=gh-pages \
-      #   --no-silent \
-      #  --cname=tsunomaki.wata.me \
-      #   --repo="$REPO_URL"
-
-      BUILD_DIR="dist/my-app"
-      GH_PAGES_DIR="gh-pages"
-
-      git fetch origin
-
-      if git show-ref --verify --quiet refs/heads/gh-pages; then
-        git worktree add "$GH_PAGES_DIR" gh-pages
-      elif git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
-        git worktree add "$GH_PAGES_DIR" origin/gh-pages
-      else
-        git worktree add -b gh-pages "$GH_PAGES_DIR" origin/main
-      fi
-
-      rm -rf "$GH_PAGES_DIR"/*
-      cp -R "$BUILD_DIR"/* "$GH_PAGES_DIR"/
-      echo "tsunomaki.wata.me" > "$GH_PAGES_DIR/CNAME"
-
-      cd "$GH_PAGES_DIR"
-      git add --all
-
-      if git diff --cached --quiet; then
-        echo "No changes to deploy"
-      else
-        git commit -m "Deploy to GitHub Pages"
-        git push origin HEAD:gh-pages
-      fi
+      npx angular-cli-ghpages \
+         --dir=dist \
+         --branch=gh-pages \
+         --no-silent \
+        --cname=tsunomaki.wata.me \
+         --repo="$REPO_URL"
     displayName: 'Deploy to GitHub Pages (gh-pages branch via worktree)'
