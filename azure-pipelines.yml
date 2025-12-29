@@ -1,0 +1,36 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - checkout: self
+    persistCredentials: true
+    displayName: 'Checkout repository'
+    
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '20.x'
+    displayName: 'Use Node.js 20'
+
+  - script: |
+      npm ci
+    displayName: 'Install dependencies'
+
+  - script: |
+      npx ng build --configuration production --base-href=/
+    displayName: 'Build Angular app (production)'
+
+  - script: |
+      git config user.name "Azure Pipelines"
+      git config user.email "builds@azure-pipelines.local"
+
+      npx angular-cli-ghpages \
+        --dir=dist \
+        --branch=$GH_PAGES_BRANCH \
+        --no-silent \
+        --cname=tsunomaki.wata.me
+    displayName: 'Deploy to GitHub Pages (gh-pages branch)'
