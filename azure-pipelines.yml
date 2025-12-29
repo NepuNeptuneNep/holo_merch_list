@@ -21,16 +21,39 @@ steps:
     displayName: 'Install dependencies'
 
   - script: |
-      npx ng build --configuration production --base-href=/
+      npx ng build --configuration production --base-href=/ --output-path=dist/my-app
     displayName: 'Build Angular app (production)'
 
   - script: |
+      set -e
+
       git config user.name "Azure Pipelines"
       git config user.email "builds@azure-pipelines.local"
 
-      npx angular-cli-ghpages \
-        --dir=dist \
-        --branch=gh-pages \
-        --no-silent \
-        --cname=tsunomaki.wata.me
-    displayName: 'Deploy to GitHub Pages (gh-pages branch)'
+      BUILD_DIR="dist/my-app"
+      GH_PAGES_DIR="gh-pages"
+
+      git fetch origin
+
+      if git show-ref --verify --quiet refs/heads/gh-pages; then
+        git worktree add "$GH_PAGES_DIR" gh-pages
+      elif git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+        git worktree add "$GH_PAGES_DIR" origin/gh-pages
+      else
+        git worktree add -b gh-pages "$GH_PAGES_DIR" origin/main
+      fi
+
+      rm -rf "$GH_PAGES_DIR"/*
+      cp -R "$BUILD_DIR"/* "$GH_PAGES_DIR"/
+      echo "tsunomaki.wata.me" > "$GH_PAGES_DIR/CNAME"
+
+      cd "$GH_PAGES_DIR"
+      git add --all
+
+      if git diff --cached --quiet; then
+        echo "No changes to deploy"
+      else
+        git commit -m "Deploy to GitHub Pages"
+        git push origin HEAD:gh-pages
+      fi
+    displayName: 'Deploy to GitHub Pages (gh-pages branch via worktree)'
