@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  vmImage: 'local'
+  name: local
 
 steps:
   - checkout: self
