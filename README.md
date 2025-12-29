@@ -13,5 +13,5 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 ## Deploy to github pages
 
-We deploy by doing `npx ng build --configuration production --base-href /` on the main branch followed by `npx angular-cli-ghpages --dir=dist --branch=gh-pages`. As of now we have to manually reset the DNS record of tsunomaki.wata.me after every deployment.
+Deployment happens automatically whenever something is pushed to the main branch via github actions. Pipeline is in .github/workflows/main.yml
 
