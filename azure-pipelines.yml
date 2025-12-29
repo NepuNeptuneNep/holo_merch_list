@@ -30,6 +30,16 @@ steps:
       git config user.name "Azure Pipelines"
       git config user.email "builds@azure-pipelines.local"
 
+      # Change to this if it is ever planned to make deployment simpler, but it needs a PAT in the pipeline:
+      # REPO_URL="https://$(GITHUB_TOKEN)@github.com/NepuNeptuneNep/holo_merch_list.git"
+
+      # npx angular-cli-ghpages \
+      #   --dir=dist \
+      #   --branch=gh-pages \
+      #   --no-silent \
+      #  --cname=tsunomaki.wata.me \
+      #   --repo="$REPO_URL"
+
       BUILD_DIR="dist/my-app"
       GH_PAGES_DIR="gh-pages"
 
