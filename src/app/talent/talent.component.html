@@ -22,27 +22,35 @@
     </div>
   </aside>
 
-  <ng-container *ngIf="isSignedIn$ | async; else textTalentList">
-    <main class="gallery">
-      <div class="container">
-        <div class="row">
-          <div class="col" *ngFor="let set of talent.sets">
-            <div class="image-card">
-              <a class="image-link" target="_blank" rel="noopener noreferrer" [href]="set.href">
-                <div class="bubble">
-                  <img [src]="set.image_url" alt="{{talent.name }}" />
-                  <button class="set-btn" type="button" (click)="searchBuyeeForSet(set.name)">
-                    Search Mercari
-                  </button>
-                </div>
-              </a>
-            </div>
+<ng-container *ngIf="hasSetHref(); else textTalentList">
+  <main class="gallery">
+    <div class="container">
+      <div class="row">
+        <div class="col" *ngFor="let set of talent.sets">
+          <div class="image-card">
+            <a
+              class="image-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              [href]="set.href"
+            >
+              <div class="bubble">
+                <img [src]="set.image_url" alt="{{ talent.name }}" />
+                <button
+                  class="set-btn"
+                  type="button"
+                  (click)="searchBuyeeForSet(set.name)"
+                >
+                  Search Mercari
+                </button>
+              </div>
+            </a>
           </div>
         </div>
       </div>
-    </main>
-  </ng-container>
-</div>
+    </div>
+  </main>
+</ng-container>
 
 <ng-template #textTalentList>
   <section class="talent-text-list">

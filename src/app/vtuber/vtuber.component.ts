@@ -45,6 +45,11 @@ export class VtuberComponent implements OnInit {
   getValue(event: Event): string {
     return (event.target as HTMLInputElement).value;
   }
+  
+  hasAnyHref(talents: TalentPreview[] | null | undefined): boolean {
+    return !!talents?.some(t => !!t?.character_image_url);
+  }
+
 
   signInWithGoogle(): void {
     this.authMessage = 'Redirecting...';

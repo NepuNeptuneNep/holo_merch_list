@@ -45,6 +45,10 @@ export class TalentComponent implements OnInit {
     });
   }
 
+  hasSetHref(): boolean {
+  return !!this.talent?.sets?.[0]?.image_url;
+}
+
   searchBuyeeForTalent() {
     window.open('https://buyee.jp/mercari/search?keyword=' + this.talent.japanese_name + '&status=on_sale&items=40&lang=en', '_blank');
   }
