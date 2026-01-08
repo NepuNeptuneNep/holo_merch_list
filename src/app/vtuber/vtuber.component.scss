@@ -13,26 +13,16 @@
     background: #fff;
     color: #3c4043;
     border: 1px solid #dadce0;
-    box-shadow: none;
     border-radius: 12px;
     font-weight: 600;
     gap: 10px;
+    cursor: pointer;
 }
 
-.google-btn:disabled {
-    opacity: 0.7;
-    cursor: wait;
-}
-
-.google-icon {
+.google-icon, .google-icon svg {
     width: 20px;
     height: 20px;
     display: inline-flex;
-}
-
-.google-icon svg {
-    width: 20px;
-    height: 20px;
 }
 
 .auth-status {
@@ -51,8 +41,6 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(15, 23, 42, 0.8));
     box-shadow: 0 10px 26px rgba(2, 6, 23, 0.24);
-    cursor: default;
-    pointer-events: none; // prevent click animation/interaction once signed in
 }
 
 .logout-btn {
@@ -67,7 +55,8 @@
         0 10px 26px rgba(248, 113, 113, 0.25),
         inset 0 1px 0 rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(8px) saturate(125%);
-    transition: transform 120ms ease, box-shadow 150ms ease, opacity 120ms ease;
+    transition: transform 120ms ease, box-shadow 150ms ease;
+    cursor: pointer;
 }
 
 .logout-btn:hover {
@@ -86,14 +75,11 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background-size: cover;
-    background-position: center;
     background-color: rgba(255, 255, 255, 0.1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    overflow: hidden;
 }
 
 .avatar-fallback {
@@ -138,16 +124,11 @@
     color: #e2e8f0;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.2);
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.22);
     transition: transform 120ms ease, box-shadow 160ms ease;
 }
 
 .talent-text-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 14px 28px rgba(2, 6, 23, 0.26);
-}
-
-.talent-text-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 8px 18px rgba(2, 6, 23, 0.22);
 }

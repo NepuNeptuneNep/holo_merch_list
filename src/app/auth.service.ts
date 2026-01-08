@@ -1,143 +1,94 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface UserProfile {
   name: string;
   email?: string;
-  pictureUrl?: string;
+  sub: string;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly apiUrl = environment.apiUrl;
-  private readonly tokenStorageKey = 'sessionToken';
+  private readonly LOGIN_HINT_KEY = 'wasLoggedIn';
+  private _ghostToken: string | null = null;
 
-  private sessionTokenSubject = new BehaviorSubject<string | null>(this.readStoredToken());
-  private profileSubject = new BehaviorSubject<UserProfile | null>(this.decodeProfileFromToken(this.sessionTokenSubject.value ?? ''));
+  private sessionTokenSubject = new BehaviorSubject<string | null>(null);
+  private profileSubject = new BehaviorSubject<UserProfile | null>(null);
 
   sessionToken$ = this.sessionTokenSubject.asObservable();
   profile$ = this.profileSubject.asObservable();
 
+  constructor() {
+    const wasRedirected = this.checkForRedirectToken();
+
+    const hint = localStorage.getItem(this.LOGIN_HINT_KEY) === 'true';
+
+    if (!wasRedirected && !this._ghostToken && hint) {
+      this.signInWithGoogle();
+    }
+  }
+
   getCurrentToken(): string | null {
-    return this.sessionTokenSubject.value;
+    return this._ghostToken;
+  }
+
+  signInWithGoogle(): void {
+    const isLocal = window.location.hostname === 'localhost';
+    const clientId = isLocal ? 'holo-merch-dev' : 'holo-merch';
+
+    localStorage.setItem(this.LOGIN_HINT_KEY, 'true');
+
+    const targetUrl = `${environment.identityUrl}/auth/google/login?client_id=${clientId}`;
+    window.location.href = targetUrl;
   }
 
   signOut(): void {
-    try {
-      sessionStorage.removeItem(this.tokenStorageKey);
-    } catch {
-      // ignore storage failures
-    }
-    this.sessionTokenSubject.next(null);
+    this._ghostToken = null;
     this.profileSubject.next(null);
+    this.sessionTokenSubject.next(null);
+    localStorage.setItem(this.LOGIN_HINT_KEY, 'false');
+
+    const isLocal = window.location.hostname === 'localhost';
+    const clientId = isLocal ? 'holo-merch-dev' : 'holo-merch';
+
+    const logoutUrl = `${environment.identityUrl}/auth/logout?client_id=${clientId}`;
+    window.location.href = logoutUrl;
   }
 
-  /**
-   * Opens backend Google OAuth in a popup. Backend should postMessage
-   * { sessionToken, profile? } or { error: 'forbidden' } to window.opener.
-   */
-  signInWithGooglePopup(): Observable<void> {
-    return new Observable<void>((observer) => {
-      const authBase = this.getApiBase();
-      const authOrigin = this.safeOrigin(authBase);
-      const popupUrl = `${authBase}/User/auth/google/start`;
+  private checkForRedirectToken(): boolean {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
 
-      const popup = window.open(
-        popupUrl,
-        'google-signin',
-        'width=500,height=640,menubar=no,toolbar=no'
-      );
+    if (token) {
+      this._ghostToken = token;
+      this.sessionTokenSubject.next(token);
 
-      if (!popup) {
-        observer.error(new Error('Popup blocked. Allow popups and try again.'));
-        return;
-      }
+      const profile = this.decodeProfileFromToken(token);
+      this.profileSubject.next(profile);
 
-      const cleanup = () => {
-        window.removeEventListener('message', onMessage);
-      };
-
-      const onMessage = (event: MessageEvent) => {
-        if (!authOrigin || event.origin !== authOrigin) {
-          return;
-        }
-
-        const data = event.data || {};
-        if (data.sessionToken) {
-          const profile = data.profile as UserProfile | undefined;
-          this.persistTokenAndProfile(data.sessionToken, profile);
-          cleanup();
-          observer.next();
-          observer.complete();
-        } else if (data.error === 'forbidden') {
-          cleanup();
-          observer.error({ status: 403, message: 'Forbidden Google account' });
-        } else if (data.error) {
-          cleanup();
-          observer.error(new Error(data.error));
-        }
-      };
-
-      window.addEventListener('message', onMessage);
-      return () => cleanup();
-    });
-  }
-
-  private persistTokenAndProfile(token: string, profile?: UserProfile) {
-    // Store token in sessionStorage (clears on tab close) instead of localStorage
-    try {
-      sessionStorage.setItem(this.tokenStorageKey, token);
-    } catch {
-      // ignore storage failures
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return true;
     }
-    this.sessionTokenSubject.next(token);
-
-    const resolvedProfile = profile ?? this.decodeProfileFromToken(token);
-    // Keep profile only in memory to reduce exposure
-    this.profileSubject.next(resolvedProfile ?? null);
+    return false;
   }
 
   private decodeProfileFromToken(token: string): UserProfile | null {
     try {
       const parts = token.split('.');
       if (parts.length < 2) return null;
-      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+
       return {
-        name: payload.name || payload.email || '',
+        name: payload.name || payload.email || 'User',
         email: payload.email,
-        pictureUrl: payload.picture,
+        sub: payload.sub
       };
-    } catch {
-      return null;
-    }
-  }
-
-  private readStoredToken(): string | null {
-    try {
-      return sessionStorage.getItem(this.tokenStorageKey);
-    } catch {
-      return null;
-    }
-  }
-
-  private getApiBase(): string {
-    try {
-      const url = new URL(this.apiUrl);
-      // Strip trailing /Talent if present
-      url.pathname = url.pathname.replace(/\/Talent\/?$/, '');
-      return url.toString().replace(/\/$/, '');
-    } catch {
-      return this.apiUrl.replace(/\/Talent\/?$/, '');
-    }
-  }
-
-  private safeOrigin(urlString: string): string | null {
-    try {
-      return new URL(urlString).origin;
-    } catch {
+    } catch (e) {
+      console.error('JWT Decode failed', e);
       return null;
     }
   }

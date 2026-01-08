@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TalentService, TalentPreview } from '../talents.service';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject, combineLatest, Observable, map } from 'rxjs';
 import { KebabPipe } from '../kebabcase.pipe';
-import { AuthService, UserProfile } from '../auth.service';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-vtuber',
@@ -14,11 +14,10 @@ import { AuthService, UserProfile } from '../auth.service';
   templateUrl: './vtuber.component.html',
   styleUrl: './vtuber.component.scss',
 })
-
-export class VtuberComponent {
+export class VtuberComponent implements OnInit {
   talents = new BehaviorSubject<TalentPreview[]>([]);
   filter = new BehaviorSubject<string>('');
-  isAuthenticating = false;
+
   authMessage = '';
   profile$ = this.authService.profile$;
   isSignedIn$ = this.authService.sessionToken$.pipe(map(token => !!token));
@@ -38,7 +37,7 @@ export class VtuberComponent {
   ) { }
 
   ngOnInit(): void {
-    this.talentService.getTalents().subscribe(async talents => {
+    this.talentService.getTalents().subscribe(talents => {
       this.talents.next(talents);
     });
   }
@@ -48,32 +47,12 @@ export class VtuberComponent {
   }
 
   signInWithGoogle(): void {
-    this.isAuthenticating = true;
-    this.authMessage = '';
-
-    this.authService.signInWithGooglePopup().subscribe({
-      next: () => {
-        this.authMessage = 'Signed in successfully.';
-        setTimeout(() => window.location.reload(), 100);
-      },
-      error: (error: any) => {
-        if (error?.status === 403) {
-          this.authMessage = 'This Google account is not allowed for access.';
-        } else if (error?.message) {
-          this.authMessage = error.message;
-        } else {
-          this.authMessage = 'Google sign-in failed. Please try again.';
-        }
-        this.isAuthenticating = false;
-      },
-      complete: () => {
-        this.isAuthenticating = false;
-      },
-    });
+    this.authMessage = 'Redirecting...';
+    this.authService.signInWithGoogle();
   }
 
   signOut(): void {
     this.authService.signOut();
-    setTimeout(() => window.location.reload(), 50);
+    this.authMessage = 'Signed out.';
   }
 }
