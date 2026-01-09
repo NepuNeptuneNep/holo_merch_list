@@ -29,11 +29,10 @@ export class TalentService {
   constructor(private http: HttpClient) { }
 
   getTalents(): Observable<TalentPreview[]> {
-    return this.http.get<TalentPreview[]>(this.apiUrl);
+    return this.http.get<TalentPreview[]>(`${this.apiUrl}/Talent`);
   }
 
   getTalent(slug: string): Observable<TalentDetail> {
-    return this.http.get<TalentDetail>(`${this.apiUrl}/${encodeURIComponent(slug)}`);
+    return this.http.get<TalentDetail>(`${this.apiUrl}/Talent/${encodeURIComponent(slug)}`);
   }
 }
-

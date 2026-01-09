@@ -24,7 +24,7 @@ const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: unknown) => {
-      if (error instanceof HttpErrorResponse && error.status === 401 && isApiRequest) {
+      if (error instanceof HttpErrorResponse && error.status === 401 && isApiRequest && !authService.isLoginInProgress()) {
         authService.signInWithGoogle();
       }
       return throwError(() => error);

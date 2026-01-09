@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TalentService, TalentPreview } from '../talents.service';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject, combineLatest, Observable, map } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, distinctUntilChanged, map, Observable } from 'rxjs';
 import { KebabPipe } from '../kebabcase.pipe';
 import { AuthService } from '../auth.service';
 
@@ -14,9 +14,10 @@ import { AuthService } from '../auth.service';
   templateUrl: './vtuber.component.html',
   styleUrl: './vtuber.component.scss',
 })
-export class VtuberComponent implements OnInit {
+export class VtuberComponent implements OnInit, OnDestroy {
   talents = new BehaviorSubject<TalentPreview[]>([]);
   filter = new BehaviorSubject<string>('');
+  private readonly subscriptions = new Subscription();
 
   authMessage = '';
   profile$ = this.authService.profile$;
@@ -37,9 +38,18 @@ export class VtuberComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.talentService.getTalents().subscribe(talents => {
-      this.talents.next(talents);
-    });
+    this.loadTalents();
+    this.subscriptions.add(
+      this.authService.sessionToken$
+        .pipe(distinctUntilChanged())
+        .subscribe(() => {
+          this.loadTalents();
+        })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   getValue(event: Event): string {
@@ -59,5 +69,11 @@ export class VtuberComponent implements OnInit {
   signOut(): void {
     this.authService.signOut();
     this.authMessage = 'Signed out.';
+  }
+
+  private loadTalents(): void {
+    this.talentService.getTalents().subscribe(talents => {
+      this.talents.next(talents);
+    });
   }
 }

@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:7089/Talent',
+  apiUrl: 'http://localhost:5142',
   identityUrl: 'https://identity.wata.me'
 };
