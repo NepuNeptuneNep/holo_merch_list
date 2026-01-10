@@ -28,9 +28,11 @@ export class AuthService {
 
   private sessionTokenSubject = new BehaviorSubject<string | null>(null);
   private profileSubject = new BehaviorSubject<UserProfile | null>(null);
+  private authReadySubject = new BehaviorSubject<boolean>(false);
 
   sessionToken$ = this.sessionTokenSubject.asObservable();
   profile$ = this.profileSubject.asObservable();
+  authReady$ = this.authReadySubject.asObservable();
 
   constructor(private httpBackend: HttpBackend) {
     this.http = new HttpClient(this.httpBackend);
@@ -72,12 +74,17 @@ export class AuthService {
   }
 
   private async handleRedirect(): Promise<void> {
+    this.authReadySubject.next(false);
     const handled = await this.checkForRedirectCode();
     const hint = localStorage.getItem(this.LOGIN_HINT_KEY) === 'true';
 
     if (!handled && !this._ghostToken && hint) {
-      this.signInWithGoogle();
+      await this.startLogin();
+      if (this.isLoginInProgress()) {
+        return;
+      }
     }
+    this.authReadySubject.next(true);
   }
 
   private async checkForRedirectCode(): Promise<boolean> {
@@ -121,7 +128,6 @@ export class AuthService {
       this.sessionTokenSubject.next(token);
       this.profileSubject.next(this.decodeProfileFromToken(token));
       localStorage.setItem(this.LOGIN_HINT_KEY, 'true');
-      console.info('Token exchange succeeded');
     } catch (err) {
       this.clearSession();
       console.error('Token exchange failed', err);

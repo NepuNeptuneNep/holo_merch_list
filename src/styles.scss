@@ -47,6 +47,7 @@ app-root {
     flex: 1 1 auto;
 }
 
+
 /* Toolbar card */
 .toolbar-card {
     display: inline-flex;
@@ -248,6 +249,7 @@ app-root {
     margin: 10px 0;
 }
 
+
 .row--compact {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 }
@@ -330,6 +332,16 @@ app-root {
     pointer-events: none;
     opacity: 0.95;
     mix-blend-mode: screen;
+}
+
+.gallery .image-card .bubble {
+    backdrop-filter: none;
+    box-shadow: 0 6px 16px rgba(2, 6, 23, 0.18);
+}
+
+.gallery .image-card .bubble::after {
+    opacity: 0.4;
+    mix-blend-mode: normal;
 }
 
 /* Images  Ethis is the important part */

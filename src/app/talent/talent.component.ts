@@ -3,7 +3,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TalentDetail, TalentService } from '../talents.service';
 import { AuthService } from '../auth.service';
-import { Subscription, distinctUntilChanged, map } from 'rxjs';
+import { Subscription, combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
 
 @Component({
   selector: 'app-talent',
@@ -36,10 +36,12 @@ export class TalentComponent implements OnInit, OnDestroy {
     }
 
     this.slug = slug;
-    this.loadTalent();
     this.subscriptions.add(
-      this.authService.sessionToken$
-        .pipe(distinctUntilChanged())
+      combineLatest([
+        this.authService.authReady$,
+        this.authService.sessionToken$.pipe(distinctUntilChanged()),
+      ])
+        .pipe(filter(([ready]) => ready))
         .subscribe(() => {
           this.loadTalent();
         })

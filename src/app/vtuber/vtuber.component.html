@@ -65,7 +65,7 @@
           <div class="image-card">
             <div class="bubble">
               <a [routerLink]="['/', (talent.name | kebabcase)]">
-                <img [src]="talent.character_image_url" [alt]="talent.name" />
+                <img [src]="getThumbnailUrl(talent.character_image_url)" [alt]="talent.name" />
               </a>
             </div>
           </div>

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TalentService, TalentPreview } from '../talents.service';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject, Subscription, combineLatest, distinctUntilChanged, map, Observable } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, distinctUntilChanged, filter, map, Observable } from 'rxjs';
 import { KebabPipe } from '../kebabcase.pipe';
 import { AuthService } from '../auth.service';
 
@@ -15,6 +15,7 @@ import { AuthService } from '../auth.service';
   styleUrl: './vtuber.component.scss',
 })
 export class VtuberComponent implements OnInit, OnDestroy {
+  private readonly thumbnailSize = 800;
   talents = new BehaviorSubject<TalentPreview[]>([]);
   filter = new BehaviorSubject<string>('');
   private readonly subscriptions = new Subscription();
@@ -38,10 +39,12 @@ export class VtuberComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.loadTalents();
     this.subscriptions.add(
-      this.authService.sessionToken$
-        .pipe(distinctUntilChanged())
+      combineLatest([
+        this.authService.authReady$,
+        this.authService.sessionToken$.pipe(distinctUntilChanged()),
+      ])
+        .pipe(filter(([ready]) => ready))
         .subscribe(() => {
           this.loadTalents();
         })
@@ -60,6 +63,29 @@ export class VtuberComponent implements OnInit, OnDestroy {
     return !!talents?.some(t => !!t?.character_image_url);
   }
 
+  getThumbnailUrl(url: string | null | undefined): string {
+    if (!url) {
+      return '';
+    }
+
+    const sizeMatch = url.match(/_(\d{2,4})x\d{0,4}(?=\.)/);
+    if (sizeMatch) {
+      const width = Number(sizeMatch[1]);
+      if (Number.isFinite(width) && width <= this.thumbnailSize) {
+        return url;
+      }
+      return url.replace(/_\d{2,4}x\d{0,4}(?=\.)/, `_${this.thumbnailSize}x`);
+    }
+
+    if (!/\/cdn\/shop\//.test(url)) {
+      return url;
+    }
+
+    return url.replace(
+      /(\.(?:png|jpe?g|webp|avif))(\?.*)?$/i,
+      `_${this.thumbnailSize}x$1$2`
+    );
+  }
 
   signInWithGoogle(): void {
     this.authMessage = 'Redirecting...';
