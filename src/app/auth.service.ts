@@ -20,6 +20,7 @@ interface TokenExchangeResponse {
 })
 export class AuthService {
   private readonly LOGIN_HINT_KEY = 'wasLoggedIn';
+  private readonly LAST_PROVIDER_KEY = 'last_auth_provider';
   private readonly PKCE_VERIFIER_KEY = 'pkce_verifier';
   private readonly PKCE_STATE_KEY = 'pkce_state';
   private readonly LOGIN_IN_PROGRESS_KEY = 'login_in_progress';
@@ -44,12 +45,17 @@ export class AuthService {
   }
 
   signInWithGoogle(): void {
-    void this.startLogin();
+    void this.startLogin('google');
+  }
+
+  signInWithRoblox(): void {
+    void this.startLogin('roblox');
   }
 
   signOut(): void {
     this.clearSession();
     localStorage.setItem(this.LOGIN_HINT_KEY, 'false');
+    localStorage.removeItem(this.LAST_PROVIDER_KEY);
 
     const clientId = this.getClientId();
     const logoutUrl = `${environment.identityUrl}/auth/logout?client_id=${encodeURIComponent(clientId)}`;
@@ -79,7 +85,8 @@ export class AuthService {
     const hint = localStorage.getItem(this.LOGIN_HINT_KEY) === 'true';
 
     if (!handled && !this._ghostToken && hint) {
-      await this.startLogin();
+      const provider = localStorage.getItem(this.LAST_PROVIDER_KEY) || 'google';
+      await this.startLogin(provider);
       if (this.isLoginInProgress()) {
         return;
       }
@@ -157,7 +164,7 @@ export class AuthService {
     return response.access_token;
   }
 
-  private async startLogin(): Promise<void> {
+  private async startLogin(provider: string): Promise<void> {
     if (this.isLoginInProgress()) {
       return;
     }
@@ -169,12 +176,13 @@ export class AuthService {
       const verifier = this.generateRandomString(32);
       const challenge = await this.createPkceChallenge(verifier);
 
-    sessionStorage.setItem(this.PKCE_STATE_KEY, state);
-    sessionStorage.setItem(this.PKCE_VERIFIER_KEY, verifier);
-    sessionStorage.setItem(this.LOGIN_IN_PROGRESS_KEY, String(Date.now()));
-    localStorage.setItem(this.LOGIN_HINT_KEY, 'true');
+      sessionStorage.setItem(this.PKCE_STATE_KEY, state);
+      sessionStorage.setItem(this.PKCE_VERIFIER_KEY, verifier);
+      sessionStorage.setItem(this.LOGIN_IN_PROGRESS_KEY, String(Date.now()));
+      localStorage.setItem(this.LOGIN_HINT_KEY, 'true');
+      localStorage.setItem(this.LAST_PROVIDER_KEY, provider);
 
-      const targetUrl = `${environment.identityUrl}/auth/google/login` +
+      const targetUrl = `${environment.identityUrl}/auth/${provider}/login` +
         `?client_id=${encodeURIComponent(clientId)}` +
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         `&response_type=code` +

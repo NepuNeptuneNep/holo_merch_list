@@ -88,8 +88,13 @@ export class VtuberComponent implements OnInit, OnDestroy {
   }
 
   signInWithGoogle(): void {
-    this.authMessage = 'Redirecting...';
+    this.authMessage = 'Redirecting to Google...';
     this.authService.signInWithGoogle();
+  }
+
+  signInWithRoblox(): void {
+    this.authMessage = 'Redirecting to Roblox...';
+    this.authService.signInWithRoblox();
   }
 
   signOut(): void {
