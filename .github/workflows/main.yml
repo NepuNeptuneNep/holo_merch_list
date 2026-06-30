@@ -28,7 +28,7 @@ jobs:
 
       - name: Build Angular app (production)
         run: |
-          npx ng build --configuration production --base-href=/ --output-path=dist/my-app
+          npx ng build --configuration production --base-href=/
 
       - name: Deploy to GitHub Pages (gh-pages branch via worktree)
         env:
@@ -40,7 +40,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           npx angular-cli-ghpages \
-            --dir=dist/my-app \
+            --dir=dist/browser \
             --branch=gh-pages \
             --no-silent \
             --cname=tsunomaki.wata.me
