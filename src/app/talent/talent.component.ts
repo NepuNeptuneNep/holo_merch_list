@@ -1,31 +1,32 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Component, DestroyRef, OnInit } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TalentDetail, TalentService } from '../talents.service';
 import { AuthService } from '../auth.service';
-import { Subscription, combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-talent',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './talent.component.html',
   styleUrl: './talent.component.scss',
 })
-export class TalentComponent implements OnInit, OnDestroy {
+export class TalentComponent implements OnInit {
   talent: TalentDetail = {
     name: '',
     japanese_name: '',
     sets: [],
   };
   isSignedIn$ = this.authService.sessionToken$.pipe(map(token => !!token));
-  private readonly subscriptions = new Subscription();
   private slug: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private talentService: TalentService,
-    private authService: AuthService
+    private authService: AuthService,
+    private readonly destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
@@ -36,25 +37,22 @@ export class TalentComponent implements OnInit, OnDestroy {
     }
 
     this.slug = slug;
-    this.subscriptions.add(
-      combineLatest([
-        this.authService.authReady$,
-        this.authService.sessionToken$.pipe(distinctUntilChanged()),
-      ])
-        .pipe(filter(([ready]) => ready))
-        .subscribe(() => {
-          this.loadTalent();
-        })
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
+    combineLatest([
+      this.authService.authReady$,
+      this.authService.sessionToken$.pipe(distinctUntilChanged()),
+    ])
+      .pipe(
+        filter(([ready]) => ready),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.loadTalent();
+      });
   }
 
   hasSetHref(): boolean {
-  return !!this.talent?.sets?.[0]?.image_url;
-}
+    return !!this.talent?.sets?.[0]?.image_url;
+  }
 
   searchBuyeeForTalent() {
     window.open('https://buyee.jp/mercari/search?keyword=' + this.talent.japanese_name + '&status=on_sale&items=40&lang=en', '_blank');

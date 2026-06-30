@@ -1,24 +1,24 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { TalentService, TalentPreview } from '../talents.service';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject, Subscription, combineLatest, distinctUntilChanged, filter, map, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map, Observable } from 'rxjs';
 import { KebabPipe } from '../kebabcase.pipe';
 import { AuthService } from '../auth.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-vtuber',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, KebabPipe],
+  imports: [CommonModule, RouterLink, FormsModule, KebabPipe],
   templateUrl: './vtuber.component.html',
   styleUrl: './vtuber.component.scss',
 })
-export class VtuberComponent implements OnInit, OnDestroy {
+export class VtuberComponent implements OnInit {
   private readonly thumbnailSize = 800;
   talents = new BehaviorSubject<TalentPreview[]>([]);
   filter = new BehaviorSubject<string>('');
-  private readonly subscriptions = new Subscription();
 
   authMessage = '';
   profile$ = this.authService.profile$;
@@ -35,24 +35,22 @@ export class VtuberComponent implements OnInit, OnDestroy {
 
   constructor(
     private talentService: TalentService,
-    private authService: AuthService
+    private authService: AuthService,
+    private readonly destroyRef: DestroyRef
   ) { }
 
   ngOnInit(): void {
-    this.subscriptions.add(
-      combineLatest([
-        this.authService.authReady$,
-        this.authService.sessionToken$.pipe(distinctUntilChanged()),
-      ])
-        .pipe(filter(([ready]) => ready))
-        .subscribe(() => {
-          this.loadTalents();
-        })
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
+    combineLatest([
+      this.authService.authReady$,
+      this.authService.sessionToken$.pipe(distinctUntilChanged()),
+    ])
+      .pipe(
+        filter(([ready]) => ready),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.loadTalents();
+      });
   }
 
   getValue(event: Event): string {
