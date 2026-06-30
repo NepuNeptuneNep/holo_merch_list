@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpBackend, HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { environment } from '../environments/environment';
 
@@ -35,7 +36,10 @@ export class AuthService {
   profile$ = this.profileSubject.asObservable();
   authReady$ = this.authReadySubject.asObservable();
 
-  constructor(private httpBackend: HttpBackend) {
+  constructor(
+    private httpBackend: HttpBackend,
+    private router: Router
+  ) {
     this.http = new HttpClient(this.httpBackend);
     void this.handleRedirect();
   }
@@ -113,17 +117,11 @@ export class AuthService {
 
     if (!code || !returnedState || !storedState || returnedState !== storedState || !verifier) {
       this.clearSession();
-      console.error('OAuth state verification failed', {
-        hasCode: !!code,
-        hasReturnedState: !!returnedState,
-        hasStoredState: !!storedState,
-        stateMatches: returnedState === storedState,
-        hasVerifier: !!verifier
-      });
       window.history.replaceState({}, document.title, window.location.pathname);
       return true;
     }
 
+    let didRedirect = false;
     try {
       const token = await this.exchangeCodeForToken(
         code,
@@ -135,11 +133,20 @@ export class AuthService {
       this.sessionTokenSubject.next(token);
       this.profileSubject.next(this.decodeProfileFromToken(token));
       localStorage.setItem(this.LOGIN_HINT_KEY, 'true');
-    } catch (err) {
+
+      const appState = this.normalizeAppState(returnedState);
+      const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (appState && appState !== currentPath) {
+        didRedirect = true;
+        void this.router.navigateByUrl(appState);
+        return true;
+      }
+    } catch {
       this.clearSession();
-      console.error('Token exchange failed', err);
     } finally {
-      window.history.replaceState({}, document.title, window.location.pathname);
+      if (!didRedirect) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     }
 
     return true;
@@ -172,11 +179,11 @@ export class AuthService {
     try {
       const clientId = this.getClientId();
       const redirectUri = this.getRedirectUri();
-      const state = this.generateRandomString(16);
+      const appState = this.getReturnPathForAppState();
       const verifier = this.generateRandomString(32);
       const challenge = await this.createPkceChallenge(verifier);
 
-      sessionStorage.setItem(this.PKCE_STATE_KEY, state);
+      sessionStorage.setItem(this.PKCE_STATE_KEY, appState);
       sessionStorage.setItem(this.PKCE_VERIFIER_KEY, verifier);
       sessionStorage.setItem(this.LOGIN_IN_PROGRESS_KEY, String(Date.now()));
       localStorage.setItem(this.LOGIN_HINT_KEY, 'true');
@@ -188,11 +195,10 @@ export class AuthService {
         `&response_type=code` +
         `&code_challenge_method=S256` +
         `&code_challenge=${encodeURIComponent(challenge)}` +
-        `&app_state=${encodeURIComponent(state)}`;
+        `&app_state=${encodeURIComponent(appState)}`;
       window.location.href = targetUrl;
-    } catch (err) {
+    } catch {
       sessionStorage.removeItem(this.LOGIN_IN_PROGRESS_KEY);
-      console.error('Login redirect failed', err);
     }
   }
 
@@ -208,6 +214,21 @@ export class AuthService {
 
   private getRedirectUri(): string {
     return `${window.location.origin}/`;
+  }
+
+  private getReturnPathForAppState(): string {
+    const path = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (!path || !path.startsWith('/') || path.startsWith('//')) {
+      return '/';
+    }
+    return path;
+  }
+
+  private normalizeAppState(value: string | null): string | null {
+    if (!value || !value.startsWith('/') || value.startsWith('//')) {
+      return null;
+    }
+    return value;
   }
 
   private async createPkceChallenge(verifier: string): Promise<string> {
@@ -245,8 +266,7 @@ export class AuthService {
         email: payload.email,
         sub: payload.sub
       };
-    } catch (e) {
-      console.error('JWT Decode failed', e);
+    } catch {
       return null;
     }
   }

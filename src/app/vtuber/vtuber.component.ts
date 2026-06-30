@@ -1,12 +1,11 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TalentService, TalentPreview } from '../talents.service';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map, Observable, shareReplay, switchMap } from 'rxjs';
 import { KebabPipe } from '../kebabcase.pipe';
 import { AuthService } from '../auth.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-vtuber',
@@ -14,44 +13,39 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   imports: [CommonModule, RouterLink, FormsModule, KebabPipe],
   templateUrl: './vtuber.component.html',
   styleUrl: './vtuber.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VtuberComponent implements OnInit {
+export class VtuberComponent {
   private readonly thumbnailSize = 800;
-  talents = new BehaviorSubject<TalentPreview[]>([]);
   filter = new BehaviorSubject<string>('');
 
   authMessage = '';
   profile$ = this.authService.profile$;
   isSignedIn$ = this.authService.sessionToken$.pipe(map(token => !!token));
 
-  filtered_talent_list: Observable<TalentPreview[]> =
-    combineLatest([this.talents.asObservable(), this.filter.asObservable()]).pipe(
-      map(([talents, filterString]) =>
-        talents.filter(t =>
-          t.name.toLowerCase().trim().includes(filterString.toLowerCase().trim())
-        )
+  talents$: Observable<TalentPreview[]> = combineLatest([
+    this.authService.authReady$.pipe(filter((ready) => ready)),
+    this.authService.sessionToken$.pipe(distinctUntilChanged())
+  ]).pipe(
+    switchMap(() => this.talentService.getTalents()),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
+  filtered_talent_list: Observable<TalentPreview[]> = combineLatest([
+    this.talents$,
+    this.filter.asObservable()
+  ]).pipe(
+    map(([talents, filterString]) =>
+      talents.filter(t =>
+        t.name.toLowerCase().trim().includes(filterString.toLowerCase().trim())
       )
-    );
+    )
+  );
 
   constructor(
     private talentService: TalentService,
-    private authService: AuthService,
-    private readonly destroyRef: DestroyRef
+    private authService: AuthService
   ) { }
-
-  ngOnInit(): void {
-    combineLatest([
-      this.authService.authReady$,
-      this.authService.sessionToken$.pipe(distinctUntilChanged()),
-    ])
-      .pipe(
-        filter(([ready]) => ready),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(() => {
-        this.loadTalents();
-      });
-  }
 
   getValue(event: Event): string {
     return (event.target as HTMLInputElement).value;
@@ -98,11 +92,5 @@ export class VtuberComponent implements OnInit {
   signOut(): void {
     this.authService.signOut();
     this.authMessage = 'Signed out.';
-  }
-
-  private loadTalents(): void {
-    this.talentService.getTalents().subscribe(talents => {
-      this.talents.next(talents);
-    });
   }
 }
