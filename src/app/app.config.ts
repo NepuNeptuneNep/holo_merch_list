@@ -1,13 +1,20 @@
 import { ApplicationConfig, inject } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptors, HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+  HttpInterceptorFn,
+  HttpErrorResponse,
+  HttpRequest,
+  HttpHandlerFn
+} from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
 import { routes } from './app.routes';
 import { AuthService } from './auth.service';
 import { environment } from '../environments/environment';
 
 
-const authInterceptor: HttpInterceptorFn = (req, next) => {
+const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
   const authService = inject(AuthService);
   const token = authService.getCurrentToken();
 
