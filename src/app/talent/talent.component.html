@@ -13,13 +13,13 @@
           <span>Talent List</span>
         </button>
 
-        <button class="btn btn-primary search-btn" [disabled]="!talent.name" (click)="searchBuyeeForTalent(talent)" aria-label="Search talent on Mercari" title="Search for {{ talent.name }} on Mercari">
+        <a class="btn btn-primary search-btn" [attr.href]="talent.mercariUrl" [attr.aria-disabled]="talent.mercariUrl ? null : 'true'" [attr.tabindex]="talent.mercariUrl ? null : -1" target="_blank" rel="noopener noreferrer" aria-label="Search talent on Mercari" title="Search for {{ talent.name }} on Mercari">
           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
             <circle cx="11" cy="11" r="5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></circle>
           </svg>
           <span>Search for talent on Mercari</span>
-        </button>
+        </a>
       </div>
     </aside>
 
@@ -45,13 +45,14 @@
                   <img [src]="set.image_url" alt="{{ talent.name }}" />
                 </a>
               </div>
-              <button
+              <a
                 class="set-btn"
-                type="button"
-                (click)="searchBuyeeForSet(set.name)"
+                [href]="set.mercariUrl"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 Search Mercari
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -61,14 +62,15 @@
 
   <ng-template #textTalentList>
     <section class="talent-text-list">
-      <button
+      <a
         class="talent-text-btn"
-        type="button"
         *ngFor="let set of talent.sets"
-        (click)="searchBuyeeForSet(set.name)"
+        [href]="set.mercariUrl"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         {{ set.name }}
-      </button>
+      </a>
     </section>
   </ng-template>
 

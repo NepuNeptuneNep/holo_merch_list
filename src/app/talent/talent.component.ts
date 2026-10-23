@@ -46,6 +46,14 @@ export class TalentComponent {
         })
       );
     }),
+    map(talent => ({
+      ...talent,
+      mercariUrl: talent.name ? this.buildMercariUrl(talent.japanese_name) : null,
+      sets: talent.sets.map(set => ({
+        ...set,
+        mercariUrl: this.buildMercariUrl(set.name)
+      }))
+    })),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
@@ -63,11 +71,7 @@ export class TalentComponent {
     this.retrySubject.next(this.retrySubject.value + 1);
   }
 
-  searchBuyeeForTalent(talent: TalentDetail): void {
-    this.searchBuyeeForSet(talent.japanese_name);
-  }
-
-  searchBuyeeForSet(keyword: string): void {
+  private buildMercariUrl(keyword: string): string {
     const url = new URL('https://buyee.jp/mercari/search');
     url.search = new URLSearchParams({
       keyword,
@@ -75,6 +79,6 @@ export class TalentComponent {
       items: '40',
       lang: 'en'
     }).toString();
-    window.open(url.toString(), '_blank', 'noopener,noreferrer');
+    return url.toString();
   }
 }

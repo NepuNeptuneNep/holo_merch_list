@@ -2,6 +2,17 @@
   display: block;
 }
 
+.search-btn,
+.set-btn,
+.talent-text-btn {
+  text-decoration: none;
+}
+
+.search-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .image-card {
   flex-direction: column;
   aspect-ratio: auto;
