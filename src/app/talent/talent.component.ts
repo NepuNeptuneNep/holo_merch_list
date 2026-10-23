@@ -52,10 +52,17 @@ export class TalentComponent {
   }
 
   searchBuyeeForTalent(talent: TalentDetail): void {
-    window.open('https://buyee.jp/mercari/search?keyword=' + talent.japanese_name + '&status=on_sale&items=40&lang=en', '_blank');
+    this.searchBuyeeForSet(talent.japanese_name);
   }
 
   searchBuyeeForSet(keyword: string): void {
-    window.open('https://buyee.jp/mercari/search?keyword=' + keyword + '&status=on_sale&items=40&lang=en', '_blank');
+    const url = new URL('https://buyee.jp/mercari/search');
+    url.search = new URLSearchParams({
+      keyword,
+      status: 'on_sale',
+      items: '40',
+      lang: 'en'
+    }).toString();
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
   }
 }
