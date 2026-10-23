@@ -61,7 +61,10 @@
   </ng-container>
 
   <ng-template #textTalentList>
-    <section class="talent-text-list">
+    <section class="gallery" *ngIf="(isSignedIn$ | async) && talent.sets.length === 0 && talent.name !== ''">
+      <p>No merch could be found for this talent.</p>
+    </section>
+    <section class="talent-text-list" *ngIf="talent.sets.length > 0">
       <a
         class="talent-text-btn"
         *ngFor="let set of talent.sets"
@@ -74,7 +77,6 @@
     </section>
   </ng-template>
 
-  <p *ngIf="(isSignedIn$ | async) && talent.sets.length === 0 && talent.name !== ''">No merch could be found for this talent.</p>
   </ng-container>
   </div>
 </ng-container>
