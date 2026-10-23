@@ -32,7 +32,7 @@ const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: Htt
   return next(authReq).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse && error.status === 401 && isApiRequest && !authService.isLoginInProgress()) {
-        authService.signInWithGoogle();
+        authService.reauthenticate();
       }
       return throwError(() => error);
     })

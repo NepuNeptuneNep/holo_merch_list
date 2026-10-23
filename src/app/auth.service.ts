@@ -56,6 +56,14 @@ export class AuthService {
     void this.startLogin('roblox');
   }
 
+  reauthenticate(): void {
+    void this.startLogin(this.getLastProvider());
+  }
+
+  private getLastProvider(): 'google' | 'roblox' {
+    return localStorage.getItem(this.LAST_PROVIDER_KEY) === 'roblox' ? 'roblox' : 'google';
+  }
+
   signOut(): void {
     this.clearSession();
     localStorage.setItem(this.LOGIN_HINT_KEY, 'false');
@@ -89,8 +97,7 @@ export class AuthService {
     const hint = localStorage.getItem(this.LOGIN_HINT_KEY) === 'true';
 
     if (!handled && !this._ghostToken && hint) {
-      const provider = localStorage.getItem(this.LAST_PROVIDER_KEY) || 'google';
-      await this.startLogin(provider);
+      await this.startLogin(this.getLastProvider());
       if (this.isLoginInProgress()) {
         return;
       }
