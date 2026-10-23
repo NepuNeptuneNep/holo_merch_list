@@ -2,29 +2,45 @@
   display: block;
 }
 
+.image-card {
+  flex-direction: column;
+  aspect-ratio: auto;
+}
+
+.image-card .bubble {
+  aspect-ratio: 1 / 1;
+  height: auto;
+  border-radius: 18px 18px 0 0;
+}
+
 .set-btn {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: 0 0 18px 18px;
+  font-family: inherit;
   font-weight: 600;
-  font-size:0.9rem;
+  font-size: 0.9rem;
   color: #fff;
-  background: rgba(0,0,0,0.78);
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 10px 26px rgba(0,0,0,0.42);
-  z-index:5;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 0;
+  box-shadow: 0 6px 16px rgba(2, 6, 23, 0.18);
+  cursor: pointer;
+  transition: background-color 120ms ease;
 }
 
 .set-btn:hover {
-  transform: translateX(-50%) translateY(-2px);
-  box-shadow: 0 18px 44px rgba(0,0,0,0.46);
-  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.set-btn:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
 }
 
 .talent-text-list {
