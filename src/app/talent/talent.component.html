@@ -13,7 +13,7 @@
           <span>Talent List</span>
         </button>
 
-        <button class="btn btn-primary search-btn" (click)="searchBuyeeForTalent(talent)" aria-label="Search talent on Mercari" title="Search for {{ talent.name }} on Mercari">
+        <button class="btn btn-primary search-btn" [disabled]="!talent.name" (click)="searchBuyeeForTalent(talent)" aria-label="Search talent on Mercari" title="Search for {{ talent.name }} on Mercari">
           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
             <circle cx="11" cy="11" r="5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></circle>
@@ -23,6 +23,12 @@
       </div>
     </aside>
 
+  <section class="gallery" *ngIf="loadError$ | async as error" role="alert">
+    <p>{{ error }}</p>
+    <button class="btn btn-ghost" type="button" (click)="retry()">Retry</button>
+  </section>
+
+  <ng-container *ngIf="!(loadError$ | async)">
   <ng-container *ngIf="hasSetHref(talent); else textTalentList">
     <main class="gallery">
       <div class="container">
@@ -67,5 +73,6 @@
   </ng-template>
 
   <p *ngIf="(isSignedIn$ | async) && talent.sets.length === 0 && talent.name !== ''">No merch could be found for this talent.</p>
+  </ng-container>
   </div>
 </ng-container>

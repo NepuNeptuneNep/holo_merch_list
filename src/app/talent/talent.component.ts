@@ -3,7 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TalentDetail, TalentService } from '../talents.service';
 import { AuthService } from '../auth.service';
-import { catchError, combineLatest, distinctUntilChanged, filter, map, of, shareReplay, switchMap } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, distinctUntilChanged, filter, map, of, shareReplay, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-talent',
@@ -14,6 +14,9 @@ import { catchError, combineLatest, distinctUntilChanged, filter, map, of, share
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TalentComponent {
+  private readonly retrySubject = new BehaviorSubject<number>(0);
+  private readonly errorSubject = new BehaviorSubject<string | null>(null);
+  loadError$ = this.errorSubject.asObservable();
   private readonly emptyTalent: TalentDetail = {
     name: '',
     japanese_name: '',
@@ -32,12 +35,17 @@ export class TalentComponent {
     this.authService.sessionToken$.pipe(
       distinctUntilChanged()
     ),
+    this.retrySubject.asObservable(),
   ]).pipe(
-    switchMap(([slug]) =>
-      this.talentService.getTalent(slug).pipe(
-        catchError(() => of(this.emptyTalent))
-      )
-    ),
+    switchMap(([slug]) => {
+      this.errorSubject.next(null);
+      return this.talentService.getTalent(slug).pipe(
+        catchError(() => {
+          this.errorSubject.next('Could not load this talent.');
+          return of(this.emptyTalent);
+        })
+      );
+    }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
@@ -49,6 +57,10 @@ export class TalentComponent {
 
   hasSetHref(talent: TalentDetail | null | undefined): boolean {
     return !!talent?.sets?.[0]?.image_url;
+  }
+
+  retry(): void {
+    this.retrySubject.next(this.retrySubject.value + 1);
   }
 
   searchBuyeeForTalent(talent: TalentDetail): void {

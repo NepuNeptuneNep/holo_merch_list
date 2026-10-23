@@ -67,6 +67,11 @@
     </div>
   </aside>
 
+  <section *ngIf="loadError$ | async as error" role="alert">
+    <p>{{ error }}</p>
+    <button class="btn" type="button" (click)="retry()">Retry</button>
+  </section>
+
   <ng-container *ngIf="filtered_talent_list | async as talents">
     <section class="gallery" *ngIf="hasAnyHref(talents); else textTalentList">
       <div class="row">

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TalentService, TalentPreview } from '../talents.service';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map, Observable, shareReplay, switchMap } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, shareReplay, switchMap } from 'rxjs';
 import { KebabPipe } from '../kebabcase.pipe';
 import { AuthService } from '../auth.service';
 
@@ -17,6 +17,9 @@ import { AuthService } from '../auth.service';
 })
 export class VtuberComponent {
   private readonly thumbnailSize = 800;
+  private readonly retrySubject = new BehaviorSubject<number>(0);
+  private readonly errorSubject = new BehaviorSubject<string | null>(null);
+  loadError$ = this.errorSubject.asObservable();
   filter = new BehaviorSubject<string>('');
 
   authMessage = '';
@@ -25,9 +28,18 @@ export class VtuberComponent {
 
   talents$: Observable<TalentPreview[]> = combineLatest([
     this.authService.authReady$.pipe(filter((ready) => ready)),
-    this.authService.sessionToken$.pipe(distinctUntilChanged())
+    this.authService.sessionToken$.pipe(distinctUntilChanged()),
+    this.retrySubject.asObservable()
   ]).pipe(
-    switchMap(() => this.talentService.getTalents()),
+    switchMap(() => {
+      this.errorSubject.next(null);
+      return this.talentService.getTalents().pipe(
+        catchError(() => {
+          this.errorSubject.next('Could not load the talent list. Please try again.');
+          return of([] as TalentPreview[]);
+        })
+      );
+    }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
@@ -49,6 +61,10 @@ export class VtuberComponent {
 
   getValue(event: Event): string {
     return (event.target as HTMLInputElement).value;
+  }
+
+  retry(): void {
+    this.retrySubject.next(this.retrySubject.value + 1);
   }
   
   hasAnyHref(talents: TalentPreview[] | null | undefined): boolean {
